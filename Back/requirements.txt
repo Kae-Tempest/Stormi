@@ -1,0 +1,5 @@
+aiohttp==3.8.6
+tortoise-orm[asyncpg]
+pydantic==2.4.2
+pydantic_core==2.10.1
+python-dotenv==1
