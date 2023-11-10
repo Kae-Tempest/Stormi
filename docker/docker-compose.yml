@@ -1,0 +1,21 @@
+version: "3"
+services:
+  db:
+    image: postgres:16-alpine
+    command: postgres -c config_file=/etc/postgresql.conf
+    shm_size: '4gb'
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304    
+    ports:
+      - 6932:5432
+    env_file: .env
+    volumes:
+      - ./docker/postgresql/postgresql.conf:/etc/postgresql.conf
+      - ./data/postgresql:/var/lib/postgresql/data
+      - ./docker/postgresql/init.sh:/docker-entrypoint-initdb.d/init.sh
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      timeout: 5s
+      retries: 300
