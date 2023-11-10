@@ -1,10 +1,10 @@
 from urllib.parse import urlencode
-from server.database.model.user import User, UserSchema
+from ..model.user import User, UserSchema
 import os
 from fastapi import APIRouter, Response
 from fastapi.responses import RedirectResponse
 import httpx
-router = APIRouter()
+router = APIRouter(tags=["twitch"])
 
 
 @router.get('/get_token')
@@ -52,8 +52,8 @@ async def get_token(request):
         return RedirectResponse(url=f"/users/{name}")
 
 
-@router.get('/users/{name}')
-async def get_user(request):
-    username = request.match_info.get('username')
+@router.get("/users/{username}", response_model=UserSchema)
+async def get_user(username: str):
+    print(username)
     user = await UserSchema.from_tortoise_orm(await User.filter(name=username).first())
     return Response(content=f"{user}")

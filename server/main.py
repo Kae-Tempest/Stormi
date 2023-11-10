@@ -1,10 +1,15 @@
+import os
 from fastapi import FastAPI
-from tortoise import run_async
-from server.database.connection import init
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from tortoise.contrib.fastapi import register_tortoise
+from .service import twitch, webhooks
 
-run_async(init())
+load_dotenv('./server/.env')
+
 app = FastAPI()
+app.include_router(twitch.router)
+app.include_router(webhooks.router)
 
 origins = [
     "https://id.twitch.tv",
@@ -23,3 +28,11 @@ app.add_middleware(
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
+
+register_tortoise(
+    app,
+    db_url=f"{os.getenv('DB_URL')}",
+    modules={'models': ['server.model.user']},
+    generate_schemas=True,
+    add_exception_handlers=True,
+)

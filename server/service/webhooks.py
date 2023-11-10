@@ -3,7 +3,7 @@ import json
 import os
 from fastapi import APIRouter, Response
 
-router = APIRouter()
+router = APIRouter(tags=["webhook"],)
 
 
 TWITCH_MESSAGE_ID = 'Twitch.py-Eventsub-Message-Id'
@@ -15,11 +15,12 @@ MESSAGE_TYPE_VERIFICATION = 'webhook_callback_verification'
 MESSAGE_TYPE_NOTIFICATION = 'notification'
 MESSAGE_TYPE_REVOCATION = 'revocation'
 
+
 @router.post('/post')
 async def webhookService(request):
-    secret = os.getenv('SECRET')
+    secret = f"{os.getenv('SECRET')}"
     message = await getHmacMessage(request)
-    hmac_string = 'sha256=' + getHmac(secret, message)
+    hmac_string = 'sha256=' + getHmac(secret.encode(), message.encode())
     if hmac.compare_digest(hmac_string, request.headers[TWITCH_MESSAGE_SIGNATURE]):
         print("signatures match")
         notif = json.loads(await request.text())
@@ -40,10 +41,10 @@ async def webhookService(request):
         Response(status_code=403)
 
 
-async def getHmacMessage(req):
+async def getHmacMessage(req) -> str:
     body = await req.text()
-    return req.headers[TWITCH_MESSAGE_ID].encode() + req.headers[TWITCH_MESSAGE_TIMESTAMP].encode() + body.encode()
+    return f"{req.headers[TWITCH_MESSAGE_ID].encode()}{req.headers[TWITCH_MESSAGE_TIMESTAMP].encode()}{body.encode()}"
 
 
-def getHmac(secret: str, message: str) -> str:
-    return hmac.new(secret.encode(), message, digestmod='sha256').hexdigest()
+def getHmac(secret: bytes, message: bytes) -> str:
+    return hmac.new(secret, message, digestmod='sha256').hexdigest()
