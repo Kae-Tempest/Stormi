@@ -2,6 +2,7 @@ import hmac
 import json
 import os
 from fastapi import APIRouter, Response
+from websocket import socket as sockets
 
 router = APIRouter(tags=["webhook"],)
 
@@ -16,7 +17,7 @@ MESSAGE_TYPE_NOTIFICATION = 'notification'
 MESSAGE_TYPE_REVOCATION = 'revocation'
 
 
-@router.post('/post')
+@router.post('/webhook')
 async def webhookService(request):
     secret = f"{os.getenv('SECRET')}"
     message = await getHmacMessage(request)
@@ -28,6 +29,8 @@ async def webhookService(request):
         if MESSAGE_TYPE_NOTIFICATION == request.headers[MESSAGE_TYPE]:
             print('Event type:' + notif.get('subscription')['type'])
             print(json.dumps(notif.get('event'), separators=None, indent=4))
+            for socket in sockets:
+                await socket.send_json(json.dumps(notif.get('event'), separators=None, indent=4))
             Response(status_code=204)
         elif MESSAGE_TYPE_VERIFICATION == request.headers[MESSAGE_TYPE]:
             return Response(status_code=204, content=notif.get('challenge'), headers={'Content-Type': 'text/plain'})
