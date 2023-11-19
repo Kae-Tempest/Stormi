@@ -1,35 +1,23 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Subscribe } from './type.ts'
+export default function App() {
+  const [subscribe, setSubscribe] = useState<Subscribe>()
+  const [eventType, setEventType] = useState('')
+  const ws = new WebSocket('ws://127.0.0.1:8000/ws')
 
-function App() {
-  const [count, setCount] = useState(0)
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    setEventType(data[1])
+    if (eventType || data[1] == 'channel.subscribe') {
+      setSubscribe(JSON.parse(data[0]))
+      console.log(subscribe)
+    }
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className='test'>{ subscribe?.user_name }</div>
+      <div>{ eventType }</div>
     </>
   )
-}
-
-export default App
+} 
