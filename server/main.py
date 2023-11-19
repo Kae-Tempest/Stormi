@@ -3,17 +3,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from tortoise.contrib.fastapi import register_tortoise
-from .service import twitch, webhooks
+from .service import twitch, webhooks, websocket
 
 load_dotenv('./server/.env')
 
 app = FastAPI()
 app.include_router(twitch.router)
 app.include_router(webhooks.router)
+app.include_router(websocket.router)
 
 origins = [
     "https://id.twitch.tv",
-    "http://localhost",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
