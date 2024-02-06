@@ -2,7 +2,7 @@ tortoise-orm[asyncpg]
 pydantic==2.4.2
 pydantic_core==2.10.1
 python-dotenv==1
-fastapi==0.104.1
+fastapi==0.109.1
 httpx==0.25.1
 uvicorn==0.24.0.post1
 websockets==12.0
